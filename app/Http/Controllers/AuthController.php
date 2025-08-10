@@ -6,23 +6,28 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
+use App\Services\TwilioVerifyService;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Twilio\Exceptions\RestException;
+
+
+
 class AuthController extends Controller
 {
+    protected $twilio;
 
-    public function register(Request $request)
+    public function __construct(TwilioVerifyService $twilio)
     {
-        // Validate the data
+        $this->twilio = $twilio;
+    }
+
+    public function registerLogin(Request $request)
+    {
         $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string',
-            'last_name' => 'required|string',
-            'email' => 'nullable|email|unique:users,email',
-            'password' => 'required|string|min:4',
-            'phone' => 'nullable|string',
-            'gender' => 'required|string|in:male,female,other,Male,Female,Other',
-            'age' => 'required|integer|min:0'
+            'phone' => 'required|min:10'
         ]);
 
-        // Response if validation fails
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -32,25 +37,82 @@ class AuthController extends Controller
         }
 
         // Get validated data once
-        $data = $validator->validated();
+        $validated = $validator->validated();
+        $phone = $validated['phone'];
 
-        // Add/override values
-        $data['role_id'] = 2;
+        try {
+            // Send OTP using Twilio
+            $verification = $this->twilio->startVerification($phone, 'sms');
 
-        // Get user object after creation
-        $user = User::create($data);
-        // Generate auth token for authenticated operations
-        $token = $user->createToken($user->first_name)->plainTextToken;
-
-        return response()->json([
-            'success' => true,
-            'data' => array_merge($user->toArray(), ['token' => $token])
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'OTP sent successfully',
+                'status'  => $verification->status, // usually 'pending'
+            ], 200);
+        } catch (RestException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 
-
-    public function login(Request $request)
+    public function verifyOtp(Request $request)
     {
-        return ['message' => 'Login Function'];
+        $request->validate([
+            'phone' => 'required',
+            'code'  => 'required'
+        ]);
+
+        $phoneNumber = $request->phone;
+        $code = $request->code;
+
+        try {
+            $check = $this->twilio->checkVerification($phoneNumber, $code);
+
+            if ($check->status === 'approved') {
+
+                $user = User::where('phone', $request->phone)->first();
+
+                if (!$user) {
+                    // If not found, create the user
+                    $user = User::create([
+                        'phone' => $phoneNumber,
+                    ]);
+
+                    $user = User::where('phone', $request->phone)->first();
+                }
+
+                $token = $user->createToken($user->first_name)->plainTextToken;
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Phone verified successfully',
+                    'user' => $user,
+                    'token' => $token,
+                    'token_type' => 'bearer'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or expired OTP'
+            ], 400);
+        } catch (\Twilio\Exceptions\RestException $e) {
+            if ($e->getStatusCode() === 404) {
+                // Twilio says: no such verification found
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No active verification found. Please request a new OTP.'
+                ], 400);
+            }
+
+            // For any other Twilio error
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong. Please try again.',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
     }
 }
