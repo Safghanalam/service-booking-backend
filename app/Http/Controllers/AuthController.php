@@ -88,7 +88,7 @@ class AuthController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'Phone verified successfully',
-                    'user' => $user,
+                    'user' => User::getUser($user->id),
                     'token' => $token,
                     'token_type' => 'bearer'
                 ]);
@@ -114,5 +114,59 @@ class AuthController extends Controller
                 'error'   => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user || !$user->currentAccessToken()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Token missing or invalid. Please login again.'
+            ], 401);
+        }
+
+        // Delete the token
+        $user->currentAccessToken()->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Logged out successfully'
+        ]);
+    }
+
+    public function logoutAllDevice(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$request->user()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not logged in.'
+            ], 401);
+        }
+
+        $request->user()->tokens()->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Logged out successfully'
+        ]);
+    }
+
+    public function user(Request $request)
+    {
+        if (!$request->user()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthenticated.'
+            ], 401);
+        }
+
+        return response()->json([
+            'success' => true,
+            'user' => User::getUser($request->user()->id)
+        ]);
     }
 }

@@ -19,7 +19,9 @@ return new class extends Migration
             $table->string('phone');
             $table->string('gender')->nullable();
             $table->integer('age')->nullable();
-            $table->integer('role_id')->default(2);  // 1 -> Admin | 2 -> User
+            $table->string('avatar')->nullable();
+            $table->tinyInteger('role_id')->default(2);  // 1 -> Admin | 2 -> User
+            $table->tinyInteger('is_deleted')->default(0);
             $table->string('password')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();

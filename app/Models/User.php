@@ -42,4 +42,11 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public static function getUser($id)
+    {
+        return self::select(['first_name', 'last_name', 'email', 'phone', 'gender', 'age', 'avatar'])
+            ->where('id', $id)
+            ->first();
+    }
 }
