@@ -83,7 +83,7 @@ class AuthController extends Controller
                     $user = User::where('phone', $request->phone)->first();
                 }
 
-                $token = $user->createToken($user->first_name)->plainTextToken;
+                $token = $user->createToken($user->phone)->plainTextToken;
 
                 return response()->json([
                     'success' => true,
