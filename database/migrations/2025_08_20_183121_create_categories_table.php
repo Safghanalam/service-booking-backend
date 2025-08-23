@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->integer('parent')->default(0);
             $table->tinyInteger('is_featured')->default(0);
             $table->tinyInteger('is_active')->default(1);
             $table->timestamps();
