@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
+use App\Models\Employee;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -16,17 +17,19 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'first_name' => 'Admin',
-            'last_name' => 'One',
-            'email' => 'admin@example.com',
-            'phone' => '+918709613425',
-            'gender' => 'Male',
-            'age' => 24,
-            'role_id' => 1,
-            'password' => 'Admin@123'
-        ]);
+        // User::factory()->create([
+        //     'first_name' => 'Admin',
+        //     'last_name' => 'One',
+        //     'email' => 'admin@example.com',
+        //     'phone' => '+918709613425',
+        //     'gender' => 'Male',
+        //     'age' => 24,
+        //     'role_id' => 1,
+        //     'password' => 'Admin@123'
+        // ]);
 
-        Category::factory()->count(10)->create();
+        // Category::factory()->count(10)->create();
+
+        Employee::factory()->count(10)->create();
     }
 }
