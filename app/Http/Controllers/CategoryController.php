@@ -69,7 +69,7 @@ class CategoryController extends Controller
 
     public function getAllCategories(Request $request)
     {
-        if ($request->user()->role_id == 1) {
+        if (isAdmin($request->user())) {
             $categories = $this->categoryModel->get();
             return response()->json([
                 'success' => true,
