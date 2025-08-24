@@ -34,7 +34,7 @@ class UserController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validation errors',
-                'errors' => $validator->errors()
+                'data' => $validator->errors()
             ], 422);
         }
 
@@ -49,15 +49,21 @@ class UserController extends Controller
             $validated['avatar'] = $avatarPath;
         }
 
-        // Updating data
-        $request->user()->update($validated);
-
-        // Response
-        return response()->json([
-            'success' => true,
-            'message' => 'User updated successfully',
-            'user' => User::getUser($request->user()->id)
-        ]);
+        if ($request->user()->update($validated)) {
+            // Response
+            return response()->json([
+                'success' => true,
+                'message' => 'User updated successfully',
+                'data' => User::getUser($request->user()->id)
+            ]);
+        } else {
+            // Response
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong',
+                'data' => []
+            ], 500);
+        }
     }
 
     public function deleteUserRequest(Request $request)
@@ -71,16 +77,23 @@ class UserController extends Controller
         }
 
         // Soft delete
-        $request->user()->update('is_deleted');
+        if ($request->user()->update('is_deleted')) {
+            // Delete all bearer tokens
+            $request->user()->tokens()->delete();
 
-        // Delete all bearer tokens
-        $request->user()->tokens()->delete();
-
-        // Response
-        return response()->json([
-            'success' => true,
-            'message' => "User successfully deleted",
-            'user' => User::getUser($request->user()->id)
-        ]);
+            // Response
+            return response()->json([
+                'success' => true,
+                'message' => "User successfully deleted",
+                'data' => User::getUser($request->user()->id)
+            ]);
+        } else {
+            // Response
+            return response()->json([
+                'success' => false,
+                'message' => "Something went wrong",
+                'data' => User::getUser($request->user()->id)
+            ], 500);
+        }
     }
 }

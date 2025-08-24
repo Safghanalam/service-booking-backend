@@ -21,10 +21,19 @@ class CategoryController extends Controller
             ->where('is_active', 1)
             ->get();
 
-        return response()->json([
-            'success' => true,
-            'data'    => $categories,
-        ]);
+        if ($categories) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Succesfully fetched active categories',
+                'data'    => $categories,
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong',
+                'data'    => [],
+            ], 500);
+        }
     }
 
     public function getParentCategories()
@@ -34,10 +43,20 @@ class CategoryController extends Controller
             ->where('is_active', 1)
             ->get();
 
-        return response()->json([
-            'success' => true,
-            'data'    => $categories,
-        ]);
+
+        if ($categories) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Succesfully fetched parent categories',
+                'data'    => $categories,
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong',
+                'data'    => [],
+            ], 500);
+        }
     }
 
     public function getSubCategories()
@@ -47,10 +66,19 @@ class CategoryController extends Controller
             ->where('is_active', 1)
             ->get();
 
-        return response()->json([
-            'success' => true,
-            'data'    => $categories,
-        ]);
+        if ($categories) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Succesfully fetched sub-categories',
+                'data'    => $categories,
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong',
+                'data'    => [],
+            ], 500);
+        }
     }
 
     public function getCategoriesByParentId(Request $request)
@@ -61,20 +89,38 @@ class CategoryController extends Controller
             ->where('is_active', 1)
             ->get();
 
-        return response()->json([
-            'success' => true,
-            'data'    => $categories,
-        ]);
+        if ($categories) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Succesfully fetched children categories',
+                'data'    => $categories,
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong',
+                'data'    => [],
+            ], 500);
+        }
     }
 
     public function getAllCategories(Request $request)
     {
         if (isAdmin($request->user())) {
             $categories = $this->categoryModel->get();
-            return response()->json([
-                'success' => true,
-                'data' => $categories
-            ]);
+            if ($categories) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Succesfully fetched all categories',
+                    'data'    => $categories,
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Something went wrong',
+                    'data'    => [],
+                ], 500);
+            }
         } else {
             return response()->json([
                 'success' => false,
@@ -88,10 +134,19 @@ class CategoryController extends Controller
     {
         if (isAdmin(($request->user()))) {
             $categories = $this->categoryModel->whereNot('parent', 0)->get();
-            return response()->json([
-                'success' => true,
-                'data' => $categories
-            ]);
+            if ($categories) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Succesfully fetched all sub-categories',
+                    'data'    => $categories,
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Something went wrong',
+                    'data'    => [],
+                ], 500);
+            }
         } else {
             return response()->json([
                 'success' => false,
@@ -114,8 +169,9 @@ class CategoryController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => $validator->errors()
-                ]);
+                    'message' => 'Validation errors',
+                    'data' => $validator->errors()
+                ], 422);
             }
 
             // Get validated data once
@@ -133,7 +189,7 @@ class CategoryController extends Controller
                     'success' => false,
                     'message' => 'Something went wrong',
                     'data' => []
-                ]);
+                ], 500);
             }
         } else {
             return response()->json([
@@ -158,8 +214,9 @@ class CategoryController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => $validator->errors()
-                ]);
+                    'message' => 'Validation errors',
+                    'data' => $validator->errors()
+                ], 422);
             }
 
             // Get validated data once
@@ -176,7 +233,7 @@ class CategoryController extends Controller
                     'success' => false,
                     'message' => 'Something went wrong',
                     'data' => $this->categoryModel->where('id', $validated['id'])->get()
-                ]);
+                ], 500);
             }
         } else {
             return response()->json([
@@ -197,9 +254,9 @@ class CategoryController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => $validator->errors(),
-                    'data' => []
-                ]);
+                    'message' => 'Validation error',
+                    'data' => $validator->errors()
+                ], 422);
             }
 
             $validated = $validator->validate();
@@ -217,7 +274,7 @@ class CategoryController extends Controller
                     'success' => false,
                     'message' => 'Something went wrong',
                     'data' => []
-                ]);
+                ], 500);
             }
         } else {
             return response()->json([

@@ -20,6 +20,7 @@ class EmployeeFactory extends Factory
             'first_name' => fake()->firstName(),
             'last_name' => fake()->lastName(),
             'profession' => fake()->jobTitle(),
+            'avatar' => fake()->imageUrl(),
             'email' => fake()->email(),
             'phone' => fake()->phoneNumber(),
             'social_links' => '{"instagram" : "https://google.com"}',

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('first_name');
             $table->string('last_name');
             $table->string('profession');
+            $table->string('avatar');
             $table->string('email');
             $table->string('phone');
             $table->json('social_links');

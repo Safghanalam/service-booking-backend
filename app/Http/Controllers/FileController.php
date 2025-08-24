@@ -66,4 +66,32 @@ class FileController extends Controller
             return false;
         }
     }
+
+    public function uploadEmployeeAvatar($employee = null, $temp_path)
+    {
+        try {
+            // Generate unique filename with extension
+            $extension = pathinfo($temp_path, PATHINFO_EXTENSION) ?: 'jpg';
+            $filename = Str::uuid() . '.' . $extension;
+
+            // Full destination path inside storage/app/public
+            $finalPath = 'employee-avatar/' . $filename;
+
+            // Put the file contents into storage
+            Storage::disk('public')->put($finalPath, file_get_contents($temp_path));
+
+            // Delete temp file if it still exists
+            if (file_exists($temp_path)) {
+                unlink($temp_path);
+            }
+
+            if ($employee && $employee->avatar) {
+                $this->deleteFile($employee->avatar);
+            }
+
+            return $finalPath;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
 }
