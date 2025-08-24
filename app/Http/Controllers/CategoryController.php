@@ -25,7 +25,7 @@ class CategoryController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Succesfully fetched active categories',
-                'data'    => $categories,
+
             ]);
         } else {
             return response()->json([
@@ -231,7 +231,7 @@ class CategoryController extends Controller
         $validated = $validator->validate();
 
         if ($validated) {
-            $deletedCategory = $this->categoryModel->where('id', $request->id)->delete();
+            $this->categoryModel->where('id', $request->id)->delete();
 
             return response()->json([
                 'success' => true,
