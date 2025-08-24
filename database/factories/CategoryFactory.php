@@ -17,11 +17,22 @@ class CategoryFactory extends Factory
      */
     public function definition(): array
     {
+        $categories = [
+            'Haircuts',
+            'Beard & Shave',
+            'Hair Styling',
+            'Hair Coloring',
+            'Facials & Skincare',
+            'Massage',
+            'Kids Grooming',
+            'Premium Packages',
+        ];
+
         return [
-            'name' => fake()->word(),
-            'parent' => 0,
-            'is_featured' => fake()->randomElement([0, 1]),
-            'is_active' => fake()->randomElement([0, 1]),
+            'name'        => fake()->randomElement($categories),
+            'parent'      => 0,
+            'is_featured' => fake()->boolean(),
+            'is_active'   => fake()->boolean(),
         ];
     }
 }

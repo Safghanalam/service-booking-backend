@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\Employee;
+use App\Models\Service;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -28,7 +29,7 @@ class DatabaseSeeder extends Seeder
             'password' => 'Admin@123'
         ]);
 
-        Category::factory()->count(10)->create();
+        Service::factory()->count(10)->create();
 
         Employee::factory()->count(10)->create();
     }

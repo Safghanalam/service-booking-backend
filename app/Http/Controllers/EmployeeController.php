@@ -27,6 +27,26 @@ class EmployeeController extends Controller
         ]);
     }
 
+    public function getAssociatedEmployees(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'service_id' => 'required|integer'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'data' => $validator->errors()
+            ]);
+        }
+
+        $validated = $validator->validate();
+
+        // Return the employees associated with service.
+
+    }
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [

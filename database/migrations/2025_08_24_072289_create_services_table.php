@@ -11,16 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('employees', function (Blueprint $table) {
+        Schema::create('services', function (Blueprint $table) {
             $table->id();
-            $table->string('first_name');
-            $table->string('last_name');
-            $table->string('profession');
-            $table->string('avatar')->nullable();
-            $table->string('email')->nullable();
-            $table->string('phone')->nullable();
-            $table->json('social_links')->nullable();
-            $table->json('working_hours')->nullable();
+            $table->string('name');
+            $table->foreignId('category_id')->constrained()->cascadeOnDelete();
+            $table->float('price');
+            $table->string('duration')->nullable();
+            $table->tinyInteger('is_featured')->default(0);
             $table->tinyInteger('is_active')->default(1);
             $table->tinyInteger('is_deleted')->default(0);
             $table->timestamps();
@@ -32,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('employees');
+        Schema::dropIfExists('services');
     }
 };
