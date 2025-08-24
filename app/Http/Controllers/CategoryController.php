@@ -104,143 +104,113 @@ class CategoryController extends Controller
         }
     }
 
+
+    // Admin Routes Functions
     public function getAllCategories(Request $request)
     {
-        if (isAdmin($request->user())) {
-            $categories = $this->categoryModel->get();
-            if ($categories) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Succesfully fetched all categories',
-                    'data'    => $categories,
-                ]);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Something went wrong',
-                    'data'    => [],
-                ], 500);
-            }
+        $categories = $this->categoryModel->get();
+        if ($categories) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Succesfully fetched all categories',
+                'data'    => $categories,
+            ]);
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized',
-                'data' => []
-            ], 403);
+                'message' => 'Something went wrong',
+                'data'    => [],
+            ], 500);
         }
     }
 
     public function getAllSubCategories(Request $request)
     {
-        if (isAdmin(($request->user()))) {
-            $categories = $this->categoryModel->whereNot('parent', 0)->get();
-            if ($categories) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Succesfully fetched all sub-categories',
-                    'data'    => $categories,
-                ]);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Something went wrong',
-                    'data'    => [],
-                ], 500);
-            }
+        $categories = $this->categoryModel->whereNot('parent', 0)->get();
+        if ($categories) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Succesfully fetched all sub-categories',
+                'data'    => $categories,
+            ]);
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized',
-                'data' => []
-            ], 403);
+                'message' => 'Something went wrong',
+                'data'    => [],
+            ], 500);
         }
     }
 
     public function addCategory(Request $request)
     {
-        if (isAdmin($request->user())) {
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|string|unique:categories,name',
-                'parent' => 'required|integer',
-                'is_featured' => 'required|in:0,1',
-                'is_active'   => 'required|in:0,1',
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|unique:categories,name',
+            'parent' => 'required|integer',
+            'is_featured' => 'required|in:0,1',
+            'is_active'   => 'required|in:0,1',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation errors',
+                'data' => $validator->errors()
+            ], 422);
+        }
+
+        // Get validated data once
+        $validated = $validator->validated();
+
+        $category = $this->categoryModel->create($validated);
+        if ($category) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Category added successfully',
+                'data' => $category
             ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation errors',
-                    'data' => $validator->errors()
-                ], 422);
-            }
-
-            // Get validated data once
-            $validated = $validator->validated();
-
-            $category = $this->categoryModel->create($validated);
-            if ($category) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Category added successfully',
-                    'data' => $category
-                ]);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Something went wrong',
-                    'data' => []
-                ], 500);
-            }
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized',
+                'message' => 'Something went wrong',
                 'data' => []
-            ], 403);
+            ], 500);
         }
     }
 
     public function updateCategory(Request $request)
     {
-        if (isAdmin($request->user())) {
-            $validator = Validator::make($request->all(), [
-                'id' => 'required',
-                'name' => 'required|string',
-                'parent' => 'required|integer',
-                'is_featured' => 'required|in:0,1',
-                'is_active'   => 'required|in:0,1',
+        $validator = Validator::make($request->all(), [
+            'id' => 'required',
+            'name' => 'required|string',
+            'parent' => 'required|integer',
+            'is_featured' => 'required|in:0,1',
+            'is_active'   => 'required|in:0,1',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation errors',
+                'data' => $validator->errors()
+            ], 422);
+        }
+
+        // Get validated data once
+        $validated = $validator->validated();
+
+        if ($this->categoryModel->where('id', $request->id)->update($validated)) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Category updated successfully',
+                'data' => $this->categoryModel->where('id', $validated['id'])->get()
             ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation errors',
-                    'data' => $validator->errors()
-                ], 422);
-            }
-
-            // Get validated data once
-            $validated = $validator->validated();
-
-            if ($this->categoryModel->where('id', $request->id)->update($validated)) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Category updated successfully',
-                    'data' => $this->categoryModel->where('id', $validated['id'])->get()
-                ]);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Something went wrong',
-                    'data' => $this->categoryModel->where('id', $validated['id'])->get()
-                ], 500);
-            }
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized',
-                'data' => []
-            ], 403);
+                'message' => 'Something went wrong',
+                'data' => $this->categoryModel->where('id', $validated['id'])->get()
+            ], 500);
         }
     }
 
@@ -250,38 +220,30 @@ class CategoryController extends Controller
             'id' => 'required|integer'
         ]);
 
-        if (isAdmin($request->user())) {
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation error',
-                    'data' => $validator->errors()
-                ], 422);
-            }
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'data' => $validator->errors()
+            ], 422);
+        }
 
-            $validated = $validator->validate();
+        $validated = $validator->validate();
 
-            if ($validated) {
-                $deletedCategory = $this->categoryModel->where('id', $request->id)->delete();
+        if ($validated) {
+            $deletedCategory = $this->categoryModel->where('id', $request->id)->delete();
 
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Category deleted succesfully',
-                    'data' => []
-                ]);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Something went wrong',
-                    'data' => []
-                ], 500);
-            }
+            return response()->json([
+                'success' => true,
+                'message' => 'Category deleted succesfully',
+                'data' => []
+            ]);
         } else {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized',
+                'message' => 'Something went wrong',
                 'data' => []
-            ], 403);
+            ], 500);
         }
     }
 }
